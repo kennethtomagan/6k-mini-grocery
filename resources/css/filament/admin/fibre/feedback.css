@@ -1,0 +1,108 @@
+/*
+ * Feedback and global behaviour: toasts, callouts, tooltips, scrollbars,
+ * a focus fallback, and reduced motion.
+ */
+
+/* ── Toast notifications ─────────────────────────────────────────────── */
+
+.fi-no-notification:not(.fi-inline) {
+    border-radius: var(--fb-radius-lg);
+    background-color: var(--fb-surface-raised);
+    box-shadow:
+        var(--fb-edge),
+        0 0 0 1px var(--fb-border),
+        var(--fb-shadow-md);
+}
+
+/* Status toasts: a faint wash of their colour and a matching hairline. */
+.fi-no-notification:not(.fi-inline).fi-color {
+    background-color: color-mix(in oklab, var(--fb-surface-raised) 90%, var(--color-500));
+    box-shadow:
+        var(--fb-edge),
+        0 0 0 1px color-mix(in oklab, var(--color-500) 34%, transparent),
+        var(--fb-shadow-md);
+}
+
+.fi-no-notification .fi-no-notification-title {
+    font-weight: 600;
+}
+
+/* Unread database notifications carry the same lit strand as selected rows. */
+.fi-no-database .fi-no-notification-unread-ctn::before {
+    background-color: var(--fb-signal);
+    box-shadow: 0 0 8px var(--fb-glow);
+}
+
+/* ── Callouts ────────────────────────────────────────────────────────── */
+
+.fi-callout:not(.fi-color) {
+    background-color: var(--fb-surface);
+    box-shadow:
+        var(--fb-edge),
+        0 0 0 1px var(--fb-border);
+}
+
+/* ── Tooltips ────────────────────────────────────────────────────────── */
+
+.tippy-box {
+    border-radius: var(--fb-radius-sm);
+    font-size: 0.8125rem;
+}
+
+/* ── Focus fallback ──────────────────────────────────────────────────── */
+
+/*
+ * Zero specificity: applies only to custom markup (render hooks, plugin
+ * views) that has no focus style of its own. Filament components keep theirs.
+ */
+:where(a, button, [role='button'], [tabindex]:not([tabindex='-1'])):focus-visible {
+    outline: 2px solid var(--fb-focus);
+    outline-offset: 2px;
+}
+
+/* ── Scrollbars (mouse and trackpad only; touch keeps native overlays) ─ */
+
+@media (pointer: fine) {
+    :root {
+        scrollbar-color: var(--fb-scrollbar) transparent;
+    }
+
+    * {
+        scrollbar-width: thin;
+    }
+
+    /* Safari, which ignores the standard properties above. */
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border: 3px solid transparent;
+        border-radius: 9999px;
+        background-color: var(--fb-scrollbar);
+        background-clip: content-box;
+    }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────── */
+
+/*
+ * The one place !important is warranted: it has to beat every transition
+ * Filament and the utilities declare. Spinners keep turning, since they
+ * carry meaning (work in progress) rather than decoration.
+ */
+@media (prefers-reduced-motion: reduce) {
+    *:not(.fi-loading-indicator),
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

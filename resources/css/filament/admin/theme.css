@@ -1,0 +1,35 @@
+/*
+ * Admin panel theme, modelled on the Fibre theme: a cool ink-gray canvas,
+ * chrome-surface sidebar and topbar, Sora headings, JetBrains Mono system
+ * labels (column headers, stat labels, section labels), and a lit fibre line
+ * that marks where you are in the navigation.
+ *
+ * How it is put together:
+ *  - The palette (primary, gray, status colours) and fonts are registered in
+ *    AdminPanelProvider, so every Filament component picks them up with no CSS.
+ *  - fibre/tokens.css holds the semantic tokens. Light and dark differ only there.
+ *  - The partials go into Filament's `components` layer, after Filament's own
+ *    rules, and mirror its selectors: source order is what makes them win, so
+ *    there is no !important, and Tailwind utilities passed through
+ *    extraAttributes() still override them.
+ */
+
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@import './fibre/tokens.css' layer(base);
+@import './fibre/shell.css' layer(components);
+@import './fibre/navigation.css' layer(components);
+@import './fibre/surfaces.css' layer(components);
+@import './fibre/controls.css' layer(components);
+@import './fibre/tables.css' layer(components);
+@import './fibre/feedback.css' layer(components);
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../app/Providers/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+/* Card radius for everything Filament draws with rounded-xl (sections, tables, callouts...). */
+@theme {
+    --radius-xl: 0.875rem;
+    --default-transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}

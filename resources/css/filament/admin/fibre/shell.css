@@ -1,0 +1,186 @@
+/*
+ * Shell: canvas, topbar, page header, breadcrumbs and simple (auth) pages.
+ * The topbar and sidebar share the "chrome" surface so they read as one
+ * L-shaped frame around the content canvas.
+ */
+
+/* ── Canvas ──────────────────────────────────────────────────────────── */
+
+.fi-body {
+    background-color: var(--fb-canvas);
+    /* A faint haze of signal light behind the page header. Static and cheap. */
+    background-image: radial-gradient(64rem 26rem at 72% -8rem, var(--fb-canvas-glow), transparent 70%);
+    background-repeat: no-repeat;
+    color: var(--fb-ink);
+    text-rendering: optimizeLegibility;
+}
+
+::selection {
+    background-color: color-mix(in oklab, var(--primary-400) 30%, transparent);
+}
+
+/* ── Topbar ──────────────────────────────────────────────────────────── */
+
+/*
+ * The glass lives on a pseudo-element: backdrop-filter on .fi-topbar itself
+ * would become the containing block for fixed children (the database
+ * notifications slide-over renders inside the topbar).
+ */
+.fi-topbar {
+    position: relative;
+    isolation: isolate;
+    background-color: transparent;
+    box-shadow: none;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background-color: var(--fb-chrome-glass);
+        border-bottom: 1px solid var(--fb-border);
+        -webkit-backdrop-filter: saturate(1.6) blur(14px);
+        backdrop-filter: saturate(1.6) blur(14px);
+    }
+}
+
+.fi-topbar-end {
+    column-gap: 0.75rem;
+}
+
+.fi-topbar-item-btn {
+    border-radius: var(--fb-radius-sm);
+    transition: background-color var(--fb-duration-fast) var(--fb-ease-out);
+
+    &:hover {
+        background-color: var(--fb-surface-hover);
+    }
+}
+
+.fi-topbar-item-label {
+    color: var(--fb-ink-2);
+}
+
+.fi-topbar-item.fi-active {
+    & .fi-topbar-item-btn {
+        background-color: var(--fb-accent-soft);
+    }
+
+    & .fi-topbar-item-label {
+        color: var(--fb-accent-ink);
+    }
+}
+
+/* Gray icon buttons in the chrome (sidebar toggles, notifications). */
+.fi-topbar .fi-icon-btn:not(.fi-color),
+.fi-sidebar-header .fi-icon-btn:not(.fi-color) {
+    border-radius: var(--fb-radius-sm);
+    color: var(--fb-ink-3);
+    transition:
+        background-color var(--fb-duration-fast) var(--fb-ease-out),
+        color var(--fb-duration-fast) var(--fb-ease-out);
+
+    &:not(.fi-disabled):not([disabled]):hover {
+        background-color: var(--fb-surface-hover);
+        color: var(--fb-ink);
+    }
+}
+
+/* Global search: a quiet command field rather than a white form input. */
+.fi-topbar .fi-global-search-field {
+    & .fi-input-wrp {
+        --fb-field-bg: var(--fb-surface-sunken);
+        --fb-field-shadow: 0 0 #0000;
+    }
+
+    @media (min-width: 768px) {
+        width: 17rem;
+    }
+}
+
+.fi-topbar .fi-user-menu-trigger .fi-avatar {
+    box-shadow:
+        0 0 0 2px var(--fb-chrome),
+        0 0 0 3px var(--fb-border-strong);
+    transition: box-shadow var(--fb-duration) var(--fb-ease-out);
+}
+
+.fi-topbar .fi-user-menu-trigger:hover .fi-avatar,
+.fi-topbar .fi-user-menu-trigger:focus-visible .fi-avatar {
+    box-shadow:
+        0 0 0 2px var(--fb-chrome),
+        0 0 0 3px var(--fb-accent-line);
+}
+
+/* ── Page header ─────────────────────────────────────────────────────── */
+
+.fi-page-header-main-ctn {
+    row-gap: 1.75rem;
+    padding-block: 1.75rem 2rem;
+}
+
+.fi-header-heading {
+    font-family: var(--fb-font-display);
+    font-size: 1.5rem;
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    color: var(--fb-ink);
+
+    @media (min-width: 640px) {
+        font-size: 1.75rem;
+    }
+}
+
+.fi-header-subheading {
+    margin-top: 0.375rem;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--fb-ink-2);
+}
+
+/* ── Breadcrumbs ─────────────────────────────────────────────────────── */
+
+.fi-breadcrumbs ol li {
+    font-size: 0.8125rem;
+    color: var(--fb-ink-3);
+
+    & a {
+        border-radius: var(--fb-radius-xs);
+        transition: color var(--fb-duration-fast) var(--fb-ease-out);
+
+        &:hover {
+            color: var(--fb-accent-ink);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--fb-focus);
+            outline-offset: 2px;
+        }
+    }
+
+    & .fi-icon {
+        color: var(--fb-ink-4);
+    }
+
+    &:last-child {
+        color: var(--fb-ink-2);
+    }
+}
+
+/* ── Simple pages (login, password reset, MFA, profile prompts) ──────── */
+
+.fi-simple-main {
+    border-radius: var(--fb-radius-xl);
+    background-color: var(--fb-surface);
+    box-shadow:
+        var(--fb-edge),
+        0 0 0 1px var(--fb-border),
+        var(--fb-shadow-md);
+}
+
+.fi-simple-header-heading {
+    font-family: var(--fb-font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}

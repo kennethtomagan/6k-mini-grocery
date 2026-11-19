@@ -1,0 +1,342 @@
+/*
+ * Surfaces: sections, repeaters, widgets, tabs, modals, dropdowns, global
+ * search and empty states. Selectors mirror Filament's own so that source
+ * order (not extra specificity) is what makes these win.
+ */
+
+/* ── Cards ───────────────────────────────────────────────────────────── */
+
+.fi-section:not(.fi-section-not-contained):not(.fi-aside),
+.fi-section:not(.fi-section-not-contained).fi-aside > .fi-section-content-ctn,
+.fi-fo-repeater .fi-fo-repeater-item,
+.fi-fo-builder .fi-fo-builder-item,
+.fi-wi-stats-overview-stat,
+.fi-empty-state:not(.fi-empty-state-not-contained) {
+    border-radius: var(--fb-radius-lg);
+    background-color: var(--fb-surface);
+    box-shadow:
+        var(--fb-edge),
+        0 0 0 1px var(--fb-border),
+        var(--fb-card-shadow, var(--fb-shadow-card));
+}
+
+/*
+ * Cards inside a card (nested sections, repeater items, tables in a section)
+ * sit one step lower, so elevation reads by depth instead of stacking floats.
+ * The variable inherits, so every level below the first card gets it.
+ */
+.fi-section:not(.fi-section-not-contained) .fi-section-content {
+    --fb-card-shadow: var(--fb-shadow-card-nested);
+}
+
+.fi-section:not(.fi-section-not-contained):not(.fi-aside).fi-secondary,
+.fi-section:not(.fi-section-not-contained).fi-aside.fi-secondary > .fi-section-content-ctn {
+    background-color: var(--fb-surface-sunken);
+    box-shadow: 0 0 0 1px var(--fb-border);
+}
+
+.fi-section:not(.fi-section-not-contained):not(.fi-aside).fi-section-has-header:not(.fi-collapsed) > .fi-section-content-ctn,
+.fi-section:not(.fi-section-not-contained) > .fi-section-content-ctn > .fi-section-footer {
+    border-color: var(--fb-divider);
+}
+
+.fi-section:not(.fi-section-not-contained) > .fi-section-content-ctn > .fi-section-footer {
+    border-end-start-radius: var(--fb-radius-lg);
+    border-end-end-radius: var(--fb-radius-lg);
+    background-color: var(--fb-surface-sunken);
+}
+
+.fi-section.fi-divided > .fi-section-content-ctn > .fi-section-content > * {
+    border-color: var(--fb-divider);
+}
+
+.fi-section .fi-section-header-heading {
+    font-family: var(--fb-font-display);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--fb-ink);
+}
+
+.fi-section .fi-section-header-description {
+    color: var(--fb-ink-3);
+}
+
+.fi-section > .fi-section-header > .fi-icon:not(.fi-color) {
+    color: var(--fb-ink-4);
+}
+
+.fi-fieldset {
+    border-color: var(--fb-border-strong);
+    border-radius: var(--fb-radius-md);
+}
+
+/* ── Stats widgets ───────────────────────────────────────────────────── */
+
+.fi-wi-stats-overview-stat {
+    padding: 1.25rem 1.5rem 1.375rem;
+
+    & .fi-wi-stats-overview-stat-label {
+        font-family: var(--fb-font-mono);
+        font-size: var(--fb-label-size);
+        font-weight: 500;
+        letter-spacing: var(--fb-label-tracking);
+        text-transform: uppercase;
+        color: var(--fb-ink-3);
+    }
+
+    & .fi-wi-stats-overview-stat-value {
+        font-family: var(--fb-font-display);
+        font-size: 1.875rem;
+        line-height: 1.15;
+        font-weight: 600;
+        letter-spacing: -0.025em;
+        font-variant-numeric: tabular-nums;
+        color: var(--fb-ink);
+    }
+
+    & .fi-wi-stats-overview-stat-description {
+        font-size: 0.8125rem;
+    }
+
+    & .fi-wi-stats-overview-stat-chart {
+        border-end-start-radius: var(--fb-radius-lg);
+        border-end-end-radius: var(--fb-radius-lg);
+    }
+}
+
+/* Stats that link somewhere lift slightly; static ones stay put. */
+a.fi-wi-stats-overview-stat {
+    transition:
+        box-shadow var(--fb-duration) var(--fb-ease-out),
+        transform var(--fb-duration) var(--fb-ease-out);
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow:
+            var(--fb-edge),
+            0 0 0 1px var(--fb-accent-line),
+            var(--fb-shadow-md);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--fb-focus);
+        outline-offset: 2px;
+    }
+}
+
+.fi-wi-chart .fi-wi-chart-grid-color {
+    color: var(--fb-divider);
+}
+
+/* ── Tabs ────────────────────────────────────────────────────────────── */
+
+/* Standalone tabs are a segmented control: a recessed track, a raised key. */
+.fi-tabs:not(.fi-contained) {
+    column-gap: 0.25rem;
+    padding: 0.25rem;
+    border-radius: var(--fb-radius-md);
+    background-color: color-mix(in oklab, var(--gray-500) 9%, transparent);
+    box-shadow: inset 0 0 0 1px var(--fb-border);
+}
+
+.fi-tabs.fi-contained {
+    border-color: var(--fb-divider);
+}
+
+.fi-tabs-item {
+    border-radius: var(--fb-radius-sm);
+    transition:
+        background-color var(--fb-duration-fast) var(--fb-ease-out),
+        box-shadow var(--fb-duration-fast) var(--fb-ease-out);
+
+    &:hover {
+        background-color: var(--fb-surface-hover);
+    }
+
+    &:focus-visible {
+        box-shadow: 0 0 0 2px var(--fb-focus);
+    }
+
+    & .fi-tabs-item-label {
+        color: var(--fb-ink-2);
+    }
+
+    & > .fi-icon {
+        color: var(--fb-ink-4);
+    }
+}
+
+.fi-tabs-item.fi-active {
+    background-color: var(--fb-accent-soft);
+
+    & .fi-tabs-item-label,
+    & > .fi-icon {
+        color: var(--fb-accent-ink);
+    }
+}
+
+.fi-tabs:not(.fi-contained) .fi-tabs-item.fi-active {
+    background-color: var(--fb-surface-raised);
+    box-shadow:
+        0 0 0 1px var(--fb-border),
+        var(--fb-shadow-xs);
+}
+
+/* ── Modals ──────────────────────────────────────────────────────────── */
+
+.fi-modal > .fi-modal-close-overlay {
+    background-color: var(--fb-scrim);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+}
+
+.fi-modal > .fi-modal-window-ctn > .fi-modal-window {
+    background-color: var(--fb-surface-raised);
+    box-shadow:
+        var(--fb-edge),
+        0 0 0 1px var(--fb-border),
+        var(--fb-shadow-lg);
+
+    & .fi-modal-heading {
+        font-family: var(--fb-font-display);
+        font-size: 1.0625rem;
+        letter-spacing: -0.015em;
+        color: var(--fb-ink);
+    }
+
+    & .fi-modal-description {
+        color: var(--fb-ink-3);
+    }
+}
+
+/* Centred modals rise slightly as they fade in (Filament only scales them). */
+.fi-modal:not(.fi-modal-slide-over) > .fi-modal-window-ctn > .fi-modal-window {
+    &.fi-transition-enter-start,
+    &.fi-transition-leave-end {
+        scale: 0.98;
+        translate: 0 0.375rem;
+    }
+}
+
+.fi-modal:not(.fi-modal-slide-over):not(.fi-width-screen) > .fi-modal-window-ctn .fi-modal-window {
+    border-radius: var(--fb-radius-xl);
+}
+
+.fi-modal:not(.fi-modal-slide-over):not(.fi-width-screen).fi-modal-has-sticky-header > .fi-modal-window-ctn > .fi-modal-window > .fi-modal-header {
+    border-start-start-radius: var(--fb-radius-xl);
+    border-start-end-radius: var(--fb-radius-xl);
+}
+
+.fi-modal:not(.fi-modal-slide-over):not(.fi-width-screen).fi-modal-has-sticky-footer > .fi-modal-window-ctn > .fi-modal-window > .fi-modal-footer {
+    border-end-start-radius: var(--fb-radius-xl);
+    border-end-end-radius: var(--fb-radius-xl);
+}
+
+.fi-modal.fi-modal-has-sticky-header > .fi-modal-window-ctn > .fi-modal-window > .fi-modal-header,
+.fi-modal.fi-modal-has-sticky-footer > .fi-modal-window-ctn > .fi-modal-window > .fi-modal-footer {
+    border-color: var(--fb-divider);
+    background-color: var(--fb-surface-raised);
+}
+
+/* ── Dropdowns ───────────────────────────────────────────────────────── */
+
+:scope .fi-dropdown-panel {
+    border-radius: var(--fb-radius-md);
+    background-color: var(--fb-surface-raised);
+    box-shadow:
+        var(--fb-edge),
+        0 0 0 1px var(--fb-border),
+        var(--fb-shadow-md);
+}
+
+:scope .fi-dropdown-panel:not(.fi-dropdown-list) > * {
+    border-color: var(--fb-divider);
+}
+
+.fi-dropdown-list-item {
+    border-radius: var(--fb-radius-xs);
+
+    &:not(.fi-disabled):not([disabled]):hover,
+    &:not(.fi-disabled):not([disabled]):focus-visible,
+    &:not(.fi-disabled):not([disabled]).fi-selected {
+        background-color: var(--fb-surface-hover);
+    }
+}
+
+.fi-dropdown-list-item-label {
+    color: var(--fb-ink-2);
+}
+
+.fi-dropdown-header {
+    color: var(--fb-ink);
+}
+
+/* ── Global search results ───────────────────────────────────────────── */
+
+.fi-global-search-results-ctn {
+    border-radius: var(--fb-radius-md);
+    background-color: var(--fb-surface-raised);
+    box-shadow:
+        var(--fb-edge),
+        0 0 0 1px var(--fb-border),
+        var(--fb-shadow-md);
+}
+
+.fi-global-search-results > *,
+.fi-global-search-result-group-results > * {
+    border-color: var(--fb-divider);
+}
+
+/* Sticky, so it needs an opaque base under the sunken tint. */
+.fi-global-search-result-group-header {
+    border-color: var(--fb-divider);
+    background-color: var(--fb-surface-raised);
+    background-image: linear-gradient(var(--fb-surface-sunken), var(--fb-surface-sunken));
+    font-family: var(--fb-font-mono);
+    font-size: var(--fb-label-size);
+    font-weight: 500;
+    letter-spacing: var(--fb-label-tracking);
+    text-transform: uppercase;
+    color: var(--fb-ink-3);
+}
+
+.fi-global-search-result:hover,
+.fi-global-search-result:focus-within {
+    background-color: var(--fb-surface-hover);
+}
+
+.fi-global-search-result-detail,
+.fi-global-search-no-results-message {
+    color: var(--fb-ink-3);
+}
+
+/* ── Empty states ────────────────────────────────────────────────────── */
+
+/* The icon sits in a port tile with a faint concentric ring, waiting for signal. */
+.fi-empty-state .fi-empty-state-icon-bg:not(.fi-color),
+.fi-ta-empty-state .fi-ta-empty-state-icon-bg {
+    border-radius: var(--fb-radius-md);
+    background-color: var(--fb-surface-sunken);
+    box-shadow:
+        inset 0 0 0 1px var(--fb-border-strong),
+        0 0 0 6px var(--fb-surface),
+        0 0 0 7px var(--fb-border);
+
+    & .fi-icon {
+        color: var(--fb-ink-3);
+    }
+}
+
+.fi-empty-state .fi-empty-state-heading,
+.fi-ta-empty-state .fi-ta-empty-state-heading {
+    font-family: var(--fb-font-display);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--fb-ink);
+}
+
+.fi-empty-state .fi-empty-state-description,
+.fi-ta-empty-state .fi-ta-empty-state-description {
+    color: var(--fb-ink-3);
+}

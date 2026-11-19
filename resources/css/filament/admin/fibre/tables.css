@@ -1,0 +1,167 @@
+/*
+ * Tables and pagination. Rows are separated by faint dividers and a hover
+ * band rather than heavy borders. Column headers use the mono system-label
+ * style, and all figures are tabular so numbers, IDs and amounts line up.
+ */
+
+/* ── Container ───────────────────────────────────────────────────────── */
+
+.fi-ta-ctn {
+    border-radius: var(--fb-radius-lg);
+    background-color: var(--fb-surface);
+    box-shadow:
+        var(--fb-edge),
+        0 0 0 1px var(--fb-border),
+        var(--fb-card-shadow, var(--fb-shadow-card));
+}
+
+.fi-ta-ctn .fi-ta-header,
+.fi-ta-ctn .fi-ta-header-toolbar,
+.fi-ta-ctn .fi-ta-filters-above-content-ctn,
+.fi-ta-ctn .fi-ta-reorder-indicator,
+.fi-ta-ctn .fi-ta-selection-indicator,
+.fi-ta-ctn .fi-ta-filter-indicators,
+.fi-ta-ctn .fi-pagination,
+.fi-ta-ctn .fi-ta-filters.fi-ta-filters-below-content {
+    border-color: var(--fb-divider);
+}
+
+.fi-ta-ctn .fi-ta-header .fi-ta-header-heading {
+    font-family: var(--fb-font-display);
+    font-size: 0.9375rem;
+    letter-spacing: -0.01em;
+}
+
+.fi-ta-ctn .fi-ta-header .fi-ta-header-description {
+    color: var(--fb-ink-3);
+}
+
+.fi-ta-ctn .fi-ta-filter-indicators,
+.fi-ta-ctn .fi-ta-reorder-indicator {
+    background-color: var(--fb-surface-sunken);
+}
+
+/* Selection is an accent state everywhere: same tint as the active nav item. */
+.fi-ta-ctn .fi-ta-selection-indicator {
+    background-color: var(--fb-accent-soft);
+}
+
+/* ── Table ───────────────────────────────────────────────────────────── */
+
+.fi-ta-table {
+    font-variant-numeric: tabular-nums;
+}
+
+.fi-ta-table > *,
+.fi-ta-table > thead > *,
+.fi-ta-table > tbody > * {
+    border-color: var(--fb-divider);
+}
+
+.fi-ta-table > thead > tr,
+.fi-ta-table > tfoot,
+.fi-ta-table-stacked-header-row .fi-ta-table-stacked-header-cell {
+    background-color: var(--fb-surface-sunken);
+}
+
+.fi-ta-table > thead > tr.fi-ta-table-head-groups-row {
+    background-color: transparent;
+}
+
+.fi-ta-header-cell {
+    padding-block: 0.6875rem;
+    font-family: var(--fb-font-mono);
+    font-size: var(--fb-label-size);
+    line-height: 1rem;
+    font-weight: 500;
+    letter-spacing: var(--fb-label-tracking);
+    text-transform: uppercase;
+    color: var(--fb-ink-3);
+}
+
+.fi-ta-header-cell.fi-ta-header-cell-sorted {
+    color: var(--fb-ink);
+
+    & .fi-icon {
+        color: var(--fb-accent);
+    }
+}
+
+.fi-ta-header-cell:not(.fi-ta-header-cell-sorted) .fi-icon {
+    color: var(--fb-ink-4);
+}
+
+.fi-ta-header-cell-sort-btn:focus-visible {
+    border-radius: var(--fb-radius-xs);
+    outline: 2px solid var(--fb-focus);
+    outline-offset: 2px;
+}
+
+/* ── Rows ────────────────────────────────────────────────────────────── */
+
+@media (hover: hover) {
+    .fi-ta-row:hover,
+    .fi-ta-row.fi-clickable:hover {
+        background-color: var(--fb-row-hover);
+    }
+}
+
+.fi-ta-row.fi-striped {
+    background-color: var(--fb-surface-sunken);
+}
+
+.fi-ta-row.fi-selected:not(.fi-striped) {
+    background-color: var(--fb-accent-soft);
+}
+
+/* The selected-row marker is the same lit strand as the active nav node. */
+.fi-ta-row.fi-selected > :first-child::before,
+.fi-ta-row.fi-selected > :first-child:where(.dark, .dark *)::before {
+    background-color: var(--fb-signal);
+    box-shadow: 0 0 8px var(--fb-glow);
+}
+
+.fi-ta-row.fi-ta-group-header-row > td {
+    background-color: var(--fb-surface-sunken);
+}
+
+.fi-ta-row .fi-ta-group-header .fi-ta-group-heading {
+    font-weight: 600;
+}
+
+/* ── Pagination ──────────────────────────────────────────────────────── */
+
+.fi-pagination .fi-pagination-overview {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--fb-ink-3);
+}
+
+.fi-pagination .fi-pagination-items {
+    border-radius: var(--fb-radius-sm);
+    background-color: var(--fb-surface);
+    box-shadow:
+        0 0 0 1px var(--fb-border-strong),
+        var(--fb-shadow-xs);
+}
+
+.fi-pagination .fi-pagination-item {
+    border-color: var(--fb-divider);
+}
+
+.fi-pagination .fi-pagination-item-btn:enabled:hover {
+    background-color: var(--fb-surface-hover);
+}
+
+.fi-pagination .fi-pagination-item.fi-active .fi-pagination-item-btn {
+    background-color: var(--fb-accent-soft);
+}
+
+.fi-pagination .fi-pagination-item.fi-active .fi-pagination-item-label {
+    color: var(--fb-accent-ink);
+}
+
+.fi-pagination .fi-pagination-item-btn .fi-pagination-item-label {
+    font-variant-numeric: tabular-nums;
+}

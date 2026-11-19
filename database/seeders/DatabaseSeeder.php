@@ -18,12 +18,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         User::query()->firstOrCreate(
-            ['email' => 'admin@k6tindahan.test'],
+            ['email' => 'admin@k6minigrocery.com'],
             ['name' => 'Store Owner', 'password' => 'password', 'role' => UserRole::Admin, 'is_active' => true],
         );
 
         User::query()->firstOrCreate(
-            ['email' => 'cashier@k6tindahan.test'],
+            ['email' => 'cashier@k6minigrocery.com'],
             ['name' => 'Cashier', 'password' => 'password', 'role' => UserRole::Cashier, 'is_active' => true],
         );
     }

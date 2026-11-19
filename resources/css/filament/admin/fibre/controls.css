@@ -1,0 +1,206 @@
+/*
+ * Controls: buttons, fields, choice controls, toggles, badges, uploads.
+ *
+ * Fields draw their outline from two variables so every state composes
+ * without repeating box-shadow stacks:
+ *   --fb-field-border  resting / hover / invalid outline
+ *   --fb-field-accent  focus outline and halo (primary, or danger when invalid)
+ */
+
+/* ── Buttons ─────────────────────────────────────────────────────────── */
+
+.fi-btn {
+    transition-duration: var(--fb-duration-fast);
+
+    &:not(.fi-disabled):not([disabled]):active {
+        scale: 0.98;
+    }
+}
+
+/* Gray (default) buttons: a raised key on the surface. */
+.fi-btn:not(.fi-color):not(.fi-outlined) {
+    background-color: var(--fb-surface);
+    box-shadow:
+        var(--fb-edge),
+        0 0 0 1px var(--fb-border-strong),
+        var(--fb-shadow-xs);
+}
+
+.fi-btn:not(.fi-color):not(.fi-outlined):not(.fi-disabled):not([disabled]):hover {
+    background-color: color-mix(in oklab, var(--fb-surface) 92%, var(--gray-500));
+}
+
+/* Solid colour buttons: a soft top sheen and a lit upper edge. */
+.fi-btn.fi-color:not(.fi-outlined):not(label) {
+    background-image: linear-gradient(to bottom, rgb(255 255 255 / 0.1), transparent 60%);
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.16),
+        0 0 0 1px color-mix(in oklab, var(--color-700) 40%, transparent),
+        0 1px 2px rgb(0 0 0 / 0.1);
+}
+
+.fi-btn.fi-outlined:not(.fi-color) {
+    --tw-ring-color: var(--fb-border-hover);
+}
+
+/* One focus treatment for every button: a gap, then a ring in the button's colour. */
+.fi-btn:not(.fi-disabled):not([disabled]):focus-visible,
+.fi-btn.fi-force-enabled:focus-visible {
+    box-shadow:
+        0 0 0 2px var(--fb-surface),
+        0 0 0 4px var(--fb-focus);
+}
+
+.fi-btn.fi-color:not(.fi-disabled):not([disabled]):focus-visible {
+    box-shadow:
+        0 0 0 2px var(--fb-surface),
+        0 0 0 4px color-mix(in oklab, var(--color-500) 60%, transparent);
+}
+
+.fi-btn-group {
+    box-shadow:
+        0 0 0 1px var(--fb-border-strong),
+        var(--fb-shadow-xs);
+}
+
+.fi-icon-btn {
+    border-radius: var(--fb-radius-sm);
+
+    &:not(.fi-disabled):not([disabled]):hover {
+        background-color: var(--fb-surface-hover);
+    }
+}
+
+.fi-link {
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+}
+
+/* ── Fields ──────────────────────────────────────────────────────────── */
+
+.fi-input-wrp {
+    --fb-field-border: var(--fb-border-strong);
+    --fb-field-accent: var(--primary-500);
+    border-radius: var(--fb-radius-sm);
+    background-color: var(--fb-field-bg, var(--fb-field));
+    box-shadow:
+        0 0 0 1px var(--fb-field-border),
+        var(--fb-field-shadow, var(--fb-shadow-xs));
+    transition:
+        box-shadow var(--fb-duration-fast) var(--fb-ease-out),
+        background-color var(--fb-duration-fast) var(--fb-ease-out);
+}
+
+.fi-input-wrp:not(.fi-disabled):hover {
+    --fb-field-border: var(--fb-border-hover);
+}
+
+.fi-input-wrp.fi-invalid,
+.fi-input-wrp.fi-invalid:hover {
+    --fb-field-border: var(--fb-danger);
+    --fb-field-accent: var(--fb-danger);
+}
+
+.fi-input-wrp:not(.fi-disabled):not(:has(.fi-ac-action:focus)):focus-within {
+    box-shadow:
+        0 0 0 1px var(--fb-field-accent),
+        0 0 0 4px color-mix(in oklab, var(--fb-field-accent) 20%, transparent);
+}
+
+.fi-input-wrp.fi-disabled {
+    --fb-field-border: var(--fb-border);
+    --fb-field-shadow: 0 0 #0000;
+    background-color: var(--fb-surface-sunken);
+}
+
+.fi-input-wrp .fi-input-wrp-prefix:not(.fi-inline),
+.fi-input-wrp .fi-input-wrp-suffix:not(.fi-inline) {
+    border-color: var(--fb-divider);
+}
+
+.fi-input-wrp .fi-input-wrp-prefix > .fi-icon:not(.fi-color),
+.fi-input-wrp .fi-input-wrp-suffix > .fi-icon:not(.fi-color) {
+    color: var(--fb-ink-4);
+    transition: color var(--fb-duration-fast) var(--fb-ease-out);
+}
+
+.fi-input-wrp:focus-within .fi-input-wrp-prefix > .fi-icon:not(.fi-color) {
+    color: var(--fb-accent);
+}
+
+input.fi-input::placeholder,
+.fi-fo-textarea textarea::placeholder {
+    color: var(--fb-ink-4);
+}
+
+.fi-fo-field .fi-fo-field-wrp-error-message {
+    color: var(--fb-danger);
+}
+
+/* Date-time picker calendar panel. */
+.fi-fo-date-time-picker .fi-fo-date-time-picker-panel {
+    border-radius: var(--fb-radius-md);
+    background-color: var(--fb-surface-raised);
+    box-shadow:
+        var(--fb-edge),
+        0 0 0 1px var(--fb-border),
+        var(--fb-shadow-md);
+}
+
+/* ── Checkbox & radio ────────────────────────────────────────────────── */
+
+input[type='checkbox'].fi-checkbox-input,
+input[type='radio'].fi-radio-input {
+    --tw-ring-color: var(--fb-border-hover);
+    background-color: var(--fb-field);
+    transition:
+        background-color var(--fb-duration-fast) var(--fb-ease-out),
+        box-shadow var(--fb-duration-fast) var(--fb-ease-out);
+}
+
+input[type='checkbox'].fi-checkbox-input {
+    border-radius: 0.3125rem;
+}
+
+/* ── Toggle ──────────────────────────────────────────────────────────── */
+
+.fi-toggle:not(.fi-color) {
+    background-color: var(--fb-toggle-off);
+}
+
+.fi-toggle > :first-child {
+    box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.2),
+        0 0 0 0.5px rgb(0 0 0 / 0.06);
+}
+
+/* ── Badges ──────────────────────────────────────────────────────────── */
+
+.fi-badge {
+    letter-spacing: 0.005em;
+}
+
+.fi-badge:not(.fi-color) {
+    --tw-ring-color: var(--fb-border-strong);
+    background-color: var(--fb-surface-sunken);
+    color: var(--fb-ink-2);
+}
+
+/* ── File upload ─────────────────────────────────────────────────────── */
+
+/* A drop zone, so it reads as a target rather than another text field. */
+.fi-fo-file-upload .filepond--root {
+    background-color: var(--fb-surface-sunken);
+    box-shadow: none;
+    outline: 1px dashed var(--fb-border-hover);
+    outline-offset: -1px;
+    transition: outline-color var(--fb-duration-fast) var(--fb-ease-out);
+
+    &:hover {
+        outline-color: var(--fb-accent-line);
+    }
+}
+
+.fi-fo-file-upload .filepond--root[data-disabled='disabled'] {
+    outline-color: var(--fb-border);
+}
