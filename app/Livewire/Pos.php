@@ -63,6 +63,10 @@ class Pos extends Component
 
     public ?string $notFoundCode = null;
 
+    /** Locked so the modal only opens through openPayment(), which refuses an empty cart. */
+    #[Locked]
+    public bool $showPaymentModal = false;
+
     public bool $showManualModal = false;
 
     public string $manualName = '';
@@ -263,6 +267,23 @@ class Pos extends Component
     {
         $this->showManualModal = false;
         $this->resetValidation(['manualName', 'manualQuantity', 'manualPrice']);
+        $this->dispatch('focus-barcode');
+    }
+
+    public function openPayment(): void
+    {
+        if ($this->lines === []) {
+            return;
+        }
+
+        $this->showPaymentModal = true;
+    }
+
+    /** Back to the cart. The cash and discount typed so far are kept for when the modal opens again. */
+    public function closePayment(): void
+    {
+        $this->showPaymentModal = false;
+        $this->resetValidation(['cashReceived', 'discount']);
         $this->dispatch('focus-barcode');
     }
 
@@ -558,6 +579,7 @@ class Pos extends Component
         $this->cashReceived = '';
         $this->notFoundCode = null;
         $this->showManualModal = false;
+        $this->showPaymentModal = false;
         $this->editingPriceKey = null;
         unset($this->subtotalCents, $this->discountCents, $this->discountTooLarge, $this->totalCents, $this->changeCents, $this->canComplete);
     }

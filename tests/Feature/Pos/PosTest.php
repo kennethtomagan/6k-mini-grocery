@@ -180,11 +180,14 @@ it('completes a sale, shows the change and starts a fresh cart', function () {
     $tokenBefore = $component->get('checkoutToken');
 
     $component
+        ->call('openPayment')
         ->set('cashReceived', '100')
         ->call('completeSale')
         ->assertHasNoErrors()
+        ->assertSet('showPaymentModal', false)
         ->assertSet('lines', [])
         ->assertSet('cashReceived', '')
+        ->assertDontSeeHtml('id="pos-cash"')
         ->assertSee('Sale complete')
         ->assertSee('₱25.00');
 
@@ -197,7 +200,10 @@ it('completes a sale, shows the change and starts a fresh cart', function () {
         ->and($transaction->change_amount)->toBe('25.00')
         ->and($product->fresh()->stock_quantity)->toBe(8);
 
-    $component->call('newSale')->assertSet('completedTransactionId', null)->assertDontSee('Sale complete');
+    $component->call('newSale')
+        ->assertSet('completedTransactionId', null)
+        ->assertDispatched('focus-barcode')
+        ->assertDontSee('Sale complete');
 });
 
 it('does not create a second sale when Complete Sale is triggered twice', function () {
@@ -218,9 +224,11 @@ it('keeps the cart when cash is short', function () {
 
     posScreen()
         ->call('addProduct', $product->id)
+        ->call('openPayment')
         ->set('cashReceived', '20')
         ->call('completeSale')
         ->assertDispatched('pos-toast')
+        ->assertSet('showPaymentModal', true)
         ->assertSet("lines.p{$product->id}.quantity", 1)
         ->assertSet('completedTransactionId', null);
 
@@ -332,19 +340,54 @@ it('renders the scanner field focused and the payment controls', function () {
 
     expect($html)
         ->toMatch('/<input\s+id="pos-barcode"[^>]*\sautofocus[\s>]/')
-        ->toContain('Complete Sale')
-        ->toContain('Cash received')
+        ->toContain('wire:click="openPayment"')
+        ->not->toContain('id="pos-cash"')
         ->not->toContain('id="pos-discount"');
+});
+
+it('opens the payment modal only for a cart with items', function () {
+    $product = Product::factory()->create(['stock_quantity' => 5]);
+
+    posScreen()
+        ->call('openPayment')
+        ->assertSet('showPaymentModal', false)
+        ->call('addProduct', $product->id)
+        ->assertDontSeeHtml('id="pos-cash"')
+        ->call('openPayment')
+        ->assertSet('showPaymentModal', true)
+        ->assertSeeHtml('id="pos-cash"')
+        ->assertSee('Cash received')
+        ->assertSee('Complete Sale');
+});
+
+it('closes the payment modal without losing the cart or the amounts typed', function () {
+    $product = Product::factory()->create(['stock_quantity' => 5]);
+
+    posScreen()
+        ->call('addProduct', $product->id)
+        ->call('openPayment')
+        ->set('cashReceived', '100')
+        ->call('closePayment')
+        ->assertSet('showPaymentModal', false)
+        ->assertSet('cashReceived', '100')
+        ->assertSet("lines.p{$product->id}.quantity", 1)
+        ->assertDispatched('focus-barcode')
+        ->assertDontSeeHtml('id="pos-cash"');
+});
+
+it('does not let the browser open the payment modal', function () {
+    expect(fn () => posScreen()->set('showPaymentModal', true))
+        ->toThrow(CannotUpdateLockedPropertyException::class);
 });
 
 it('shows the discount field and price buttons only to permitted users', function () {
     $product = Product::factory()->create(['stock_quantity' => 5]);
 
-    posScreen()->call('addProduct', $product->id)
+    posScreen()->call('addProduct', $product->id)->call('openPayment')
         ->assertDontSeeHtml('id="pos-discount"')
         ->assertDontSeeHtml('openPriceEditor');
 
-    posScreen(cashier(['can_override_price' => true, 'can_apply_discount' => true]))->call('addProduct', $product->id)
+    posScreen(cashier(['can_override_price' => true, 'can_apply_discount' => true]))->call('addProduct', $product->id)->call('openPayment')
         ->assertSeeHtml('id="pos-discount"')
         ->assertSeeHtml("openPriceEditor('p{$product->id}')");
 });

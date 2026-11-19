@@ -5,7 +5,10 @@
         toast: null,
         toastTimer: null,
         modalOpen() {
-            return $wire.showManualModal || $wire.editingPriceKey !== null || $wire.completedTransactionId !== null;
+            return $wire.showManualModal || $wire.showPaymentModal || $wire.editingPriceKey !== null || $wire.completedTransactionId !== null;
+        },
+        focusCash() {
+            this.$nextTick(() => { const cash = document.getElementById('pos-cash'); if (cash) cash.focus(); });
         },
         focusBarcode() {
             this.$nextTick(() => { if (! this.modalOpen() && this.$refs.barcode) this.$refs.barcode.focus(); });
@@ -48,11 +51,11 @@
         </nav>
     </header>
 
-    <main class="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto lg:grid-cols-[minmax(0,1fr)_30rem] lg:overflow-hidden">
+    <main class="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto md:grid-cols-[minmax(0,1fr)_22rem] md:overflow-hidden lg:grid-cols-[minmax(0,1fr)_26rem] xl:grid-cols-[minmax(0,1fr)_30rem]">
 
         {{-- LEFT: find products --}}
         <section class="flex min-h-0 flex-col gap-3 p-4">
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
                 <form wire:submit="scan">
                     <label for="pos-barcode" class="sr-only">Scan barcode</label>
                     <input id="pos-barcode" autofocus x-ref="barcode" wire:model="barcode" type="text" autocomplete="off"
@@ -94,7 +97,7 @@
                         class="ml-auto min-h-12 shrink-0 rounded-full bg-slate-800 px-5 font-semibold text-white hover:bg-slate-700">+ Manual item</button>
             </div>
 
-            <div class="grid min-h-0 flex-1 auto-rows-max grid-cols-2 gap-3 overflow-y-auto sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            <div class="grid min-h-0 flex-1 auto-rows-max grid-cols-2 gap-3 overflow-y-auto sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                 @forelse ($this->products as $product)
                     @php $soldOut = $product->stock_quantity <= 0 && ! $this->allowNegativeStock; @endphp
                     <button type="button" wire:key="product-{{ $product->id }}" wire:click="addProduct({{ $product->id }})"
@@ -127,7 +130,7 @@
             </div>
         </section>
 
-        {{-- RIGHT: cart and payment --}}
+        {{-- RIGHT: cart --}}
         <aside class="flex min-h-0 flex-col border-l border-slate-300 bg-white">
             <div class="flex shrink-0 items-center justify-between border-b border-slate-200 px-4 py-3">
                 <h2 class="text-xl font-bold">Cart <span class="font-normal text-slate-500">({{ array_sum(array_column($cartLines, 'quantity')) }})</span></h2>
@@ -190,27 +193,18 @@
                 @endforelse
             </ul>
 
-            {{-- Payment panel --}}
+            {{-- Cart summary --}}
             <div class="shrink-0 space-y-3 bg-slate-900 p-4 text-white">
                 <dl class="space-y-1">
                     <div class="flex justify-between text-slate-300">
-                        <dt>Subtotal</dt><dd>{{ Money::format($this->subtotalCents) }}</dd>
+                        <dt>Subtotal</dt><dd class="tabular-nums">{{ Money::format($this->subtotalCents) }}</dd>
                     </div>
-                    @if ($this->canDiscount)
-                        <div class="flex items-center justify-between text-slate-300">
-                            <dt><label for="pos-discount">Discount (₱)</label></dt>
-                            <dd>
-                                <input id="pos-discount" wire:model.live.debounce.300ms="discount" type="number" min="0" step="0.01" inputmode="decimal"
-                                       class="h-12 w-32 rounded-lg border-0 bg-slate-800 px-3 text-right text-xl text-white">
-                            </dd>
-                        </div>
-                        @error('discount')
-                            <p class="text-right text-base text-red-300">{{ $message }}</p>
-                        @else
-                            @if ($this->discountTooLarge)
-                                <p class="text-right text-base text-red-300">Discount cannot be more than the subtotal.</p>
-                            @endif
-                        @enderror
+                    <div class="flex justify-between text-slate-300">
+                        <dt>Discount</dt>
+                        <dd class="tabular-nums">{{ $this->discountCents > 0 ? '−'.Money::format($this->discountCents) : Money::format(0) }}</dd>
+                    </div>
+                    @if ($this->discountTooLarge)
+                        <p class="text-right text-base text-red-300">Discount cannot be more than the subtotal.</p>
                     @endif
                     <div class="flex items-baseline justify-between border-t border-slate-700 pt-2">
                         <dt class="text-xl font-semibold">Total</dt>
@@ -218,31 +212,9 @@
                     </div>
                 </dl>
 
-                <div>
-                    <label for="pos-cash" class="mb-1 block text-slate-300">Cash received (₱)</label>
-                    <input id="pos-cash" wire:model.live.debounce.200ms="cashReceived" wire:keydown.enter="completeSale"
-                           type="number" min="0" step="0.01" inputmode="decimal"
-                           class="h-14 w-full rounded-xl border-0 bg-white px-4 text-right text-3xl font-bold text-slate-900">
-                    @error('cashReceived') <p class="mt-1 text-base text-red-300">{{ $message }}</p> @enderror
-                    <div class="mt-2 grid grid-cols-4 gap-2">
-                        <button type="button" wire:click="exactCash" class="min-h-12 rounded-lg bg-slate-700 font-semibold hover:bg-slate-600">Exact</button>
-                        @foreach ([50, 100, 200, 500, 1000] as $bill)
-                            <button type="button" wire:click="setCash({{ $bill }})" wire:key="bill-{{ $bill }}"
-                                    class="min-h-12 rounded-lg bg-slate-700 font-semibold hover:bg-slate-600">₱{{ number_format($bill) }}</button>
-                        @endforeach
-                    </div>
-                </div>
-
-                <div class="flex items-baseline justify-between">
-                    <span class="text-xl font-semibold">Change</span>
-                    <span class="text-4xl font-extrabold tabular-nums text-emerald-400">{{ Money::format($this->changeCents) }}</span>
-                </div>
-
-                <button type="button" wire:click="completeSale" wire:loading.attr="disabled" wire:target="completeSale"
-                        @disabled(! $this->canComplete)
+                <button type="button" wire:click="openPayment" @disabled($cartLines === [])
                         class="h-16 w-full rounded-xl bg-emerald-500 text-2xl font-extrabold text-white hover:bg-emerald-400 disabled:bg-slate-700 disabled:text-slate-400">
-                    <span wire:loading.remove wire:target="completeSale">Complete Sale</span>
-                    <span wire:loading wire:target="completeSale">Saving…</span>
+                    Payment
                 </button>
             </div>
         </aside>
@@ -303,6 +275,94 @@
                     </span>
                 </div>
             </form>
+        </div>
+    @endif
+
+    {{-- Payment modal --}}
+    @if ($showPaymentModal)
+        <div data-modal class="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/60 p-4" role="dialog" aria-modal="true" aria-labelledby="payment-title"
+             x-on:keydown.escape.window="$wire.closePayment()">
+            <div class="flex max-h-full w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
+                <div class="flex shrink-0 items-center justify-between border-b border-slate-200 px-6 py-3">
+                    <h2 id="payment-title" class="text-2xl font-bold">Payment</h2>
+                    <button type="button" wire:click="closePayment" aria-label="Back to cart"
+                            class="flex size-12 items-center justify-center rounded-lg text-3xl text-slate-500 hover:bg-slate-100">&times;</button>
+                </div>
+
+                <div class="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto md:grid-cols-2">
+                    {{-- Amount due --}}
+                    <div class="flex flex-col gap-5 bg-slate-900 p-6 text-white">
+                        <dl class="space-y-2">
+                            <div class="flex justify-between text-slate-300">
+                                @php $itemCount = array_sum(array_column($cartLines, 'quantity')); @endphp
+                                <dt>Subtotal <span class="text-slate-500">({{ $itemCount }} {{ Str::plural('item', $itemCount) }})</span></dt>
+                                <dd class="tabular-nums">{{ Money::format($this->subtotalCents) }}</dd>
+                            </div>
+                            @if ($this->canDiscount)
+                                <div class="flex items-center justify-between gap-3 text-slate-300">
+                                    <dt><label for="pos-discount">Discount (₱)</label></dt>
+                                    <dd>
+                                        <input id="pos-discount" wire:model.live.debounce.300ms="discount" type="number" min="0" step="0.01" inputmode="decimal"
+                                               class="h-12 w-36 rounded-lg border-0 bg-slate-800 px-3 text-right text-xl text-white focus:outline-none focus:ring-4 focus:ring-emerald-500/40">
+                                    </dd>
+                                </div>
+                                @error('discount')
+                                    <p class="text-right text-base text-red-300">{{ $message }}</p>
+                                @else
+                                    @if ($this->discountTooLarge)
+                                        <p class="text-right text-base text-red-300">Discount cannot be more than the subtotal.</p>
+                                    @endif
+                                @enderror
+                            @else
+                                <div class="flex justify-between text-slate-300">
+                                    <dt>Discount</dt><dd class="tabular-nums">{{ Money::format(0) }}</dd>
+                                </div>
+                            @endif
+                            <div class="flex items-baseline justify-between border-t border-slate-700 pt-3">
+                                <dt class="text-xl font-semibold">Total</dt>
+                                <dd class="text-4xl font-extrabold tabular-nums">{{ Money::format($this->totalCents) }}</dd>
+                            </div>
+                        </dl>
+
+                        <div class="mt-auto rounded-xl bg-slate-800 p-4">
+                            <div class="text-lg text-slate-300">Change</div>
+                            <div class="text-5xl font-extrabold tabular-nums text-emerald-400">{{ Money::format($this->changeCents) }}</div>
+                        </div>
+                    </div>
+
+                    {{-- Cash --}}
+                    <div class="flex flex-col gap-4 p-6">
+                        <div>
+                            <label for="pos-cash" class="mb-1 block font-semibold">Cash received (₱)</label>
+                            <input id="pos-cash" wire:model.live.debounce.200ms="cashReceived" wire:keydown.enter="completeSale"
+                                   type="number" min="0" step="0.01" inputmode="decimal"
+                                   x-init="$nextTick(() => { $el.focus(); $el.select(); })"
+                                   class="h-16 w-full rounded-xl border-2 border-slate-300 px-4 text-right text-3xl font-bold focus:border-emerald-600 focus:outline-none focus:ring-4 focus:ring-emerald-200">
+                            @error('cashReceived') <p class="mt-1 text-base text-red-600">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" wire:click="exactCash" x-on:click="focusCash()"
+                                    class="min-h-14 rounded-lg bg-slate-100 font-semibold text-slate-800 ring-1 ring-slate-300 hover:bg-slate-200">Exact</button>
+                            @foreach ([50, 100, 200, 500, 1000] as $bill)
+                                <button type="button" wire:click="setCash({{ $bill }})" wire:key="bill-{{ $bill }}" x-on:click="focusCash()"
+                                        class="min-h-14 rounded-lg bg-slate-100 font-semibold text-slate-800 ring-1 ring-slate-300 hover:bg-slate-200">₱{{ number_format($bill) }}</button>
+                            @endforeach
+                        </div>
+
+                        <div class="mt-auto flex flex-col gap-3 pt-2">
+                            <button type="button" wire:click="completeSale" wire:loading.attr="disabled" wire:target="completeSale"
+                                    @disabled(! $this->canComplete)
+                                    class="h-16 w-full rounded-xl bg-emerald-600 text-2xl font-extrabold text-white hover:bg-emerald-500 disabled:bg-slate-200 disabled:text-slate-400">
+                                <span wire:loading.remove wire:target="completeSale">Complete Sale</span>
+                                <span wire:loading wire:target="completeSale">Saving…</span>
+                            </button>
+                            <button type="button" wire:click="closePayment"
+                                    class="min-h-12 rounded-xl font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50">Back to cart</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     @endif
 
